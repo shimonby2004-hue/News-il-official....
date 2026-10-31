@@ -36,15 +36,37 @@ DB_PATH = os.getenv("DB_PATH", "newsil.db")
 
 CREDIT = "כתבי News IL בשטח ומעדכנים"
 BUTTON_TEXT = "📰 לכתבה המלאה"
-# צבע הכפתור: primary (כחול) / success (ירוק) / danger (אדום). ריק = ברירת מחדל של טלגרם
 BUTTON_STYLE = os.getenv("BUTTON_STYLE", "primary").strip()
 
 DEFAULT_FEEDS = [
+    # === חדשות ישראליות ===
     "https://www.ynet.co.il/Integration/StoryRss2.xml",
     "https://rss.walla.co.il/feed/1",
     "https://www.maariv.co.il/Rss/RssFeedsMivzakim",
     "https://www.israelhayom.co.il/rss.xml",
-    "https://rcs.mako.co.il/rss/31750a2610f26110VgnVCM1000005201000aRCRD.xml",
+
+    # === בינה מלאכותית פורצת דרך ===
+    "https://openai.com/news/rss.xml",
+    "https://deepmind.google/blog/rss.xml",
+    "https://huggingface.co/blog/feed.xml",
+    "https://techcrunch.com/category/artificial-intelligence/feed/",
+    "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+    "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
+
+    # === מחקרים + מדע קיצוני ===
+    "https://www.nature.com/nature.rss",
+    "https://www.sciencedaily.com/rss/all.xml",
+    "https://phys.org/rss-feed/",
+    "https://www.sciencealert.com/feed",
+    "https://www.newscientist.com/feed/",
+
+    # === אסונות, רעידות אדמה, אירועים קיצוניים בעולם ===
+    "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.atom",
+    "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.atom",
+    "https://watchers.news/feed/",
+    "https://www.sciencedaily.com/rss/earth_climate.xml",
+    "https://phys.org/rss-feed/earth-news/",
+    "https://reliefweb.int/updates/rss.xml",
 ]
 FEEDS = [f.strip() for f in os.getenv("FEEDS", "").split(",") if f.strip()] or DEFAULT_FEEDS
 

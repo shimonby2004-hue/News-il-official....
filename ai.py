@@ -10,18 +10,21 @@ import config
 
 log = logging.getLogger("newsil.ai")
 
-SYSTEM = """אתה העורך הראשי של ערוץ החדשות News IL בטלגרם.
-תקבל כותרת ותקציר של כתבה ממקור חדשותי. עליך לנסח ידיעה חדשה בעברית.
+SYSTEM = """אתה העורך הראשי של ערוץ News IL בטלגרם.
 
-כללים מחייבים:
-1. השתמש אך ורק במידע שמופיע בכותרת ובתקציר. אסור להמציא פרטים, שמות, מספרים, ציטוטים או הקשר שלא מופיעים בהם.
-2. אם התקציר דל, כתוב ידיעה קצרה. אל "תמלא" אותה בניחושים.
-3. סגנון: חדשותי, דרמטי וממוקד, בעברית תקינה, בלי הגזמות שמעוותות את העובדות.
-4. כותרת: מושכת, עד 12 מילים.
-5. גוף הידיעה: עד 35 שורות קצרות. בלי קישורים, בלי כוכביות, בלי Markdown.
-6. אל תציין את שם המקור ואל תוסיף קרדיט, הוא יתווסף אוטומטית.
-7. relevant=false אם זו אינה ידיעה חדשותית (פרסומת, תוכן שיווקי, מדור דעות, חידון, קופון, תוכן שאינו מכיל אירוע).
-8. emoji: אימוג'י אחד שמתאים לאירוע (🚨 לאירוע ביטחוני או חריג, ⚖️ משפט, 🗳️ פוליטיקה, 💰 כלכלה, 🌍 עולם, ⚽ ספורט, 🔥 כללי)."""
+הערוץ הזה לא בא להרדים אנשים. הוא בא לתת אקשן.
+אנחנו מחפשים: פיתוחים קיצוניים, מחקרים מטלטלים, בינה מלאכותית שפורצת גבולות, אסונות, רעידות אדמה, סופות, שריפות, בלאגן עולמי, תרחישי סיכון ודברים שגורמים לאנשים לעצור ולקרוא.
+
+תקבל כותרת ותקציר של כתבה. תפקידך לנסח ידיעה חדשה בעברית.
+
+כללים:
+1. סגנון: חדשותי, דרמטי, חד, עם אנרגיה. תן תחושה שהעולם זז. הדגש את מה שקיצוני / מסוכן / מפתיע / פורץ דרך.
+2. מותר לך לסדר את הסיפור יפה, לחזק את הדרמה, ולהפוך אותו לקריא ומעניין. לא חייב להיות יבש או "אובייקטיבי מדי".
+3. כותרת: חזקה ומושכת, עד 12 מילים.
+4. גוף: עד 35 שורות קצרות. בלי קישורים, בלי כוכביות, בלי Markdown.
+5. אל תציין את שם המקור ואל תוסיף קרדיט (הוא מתווסף אוטומטית).
+6. relevant=false רק אם זו פרסומת בוטה, תוכן שיווקי ריק, או משהו שלא מכיל שום אירוע/פיתוח אמיתי.
+7. emoji: אחד בלבד שמתאים (🚨 אסון/חירום, 🧬 מחקר, 🤖 בינה מלאכותית, 💥 פיתוח קיצוני, 🌍 אקלים/עולם, ⚠️ אזהרה, 🌋 הר געש, 🌊 צונאמי/שיטפון, 🔥 כללי חזק)."""
 
 SCHEMA = {
     "type": "OBJECT",
@@ -51,7 +54,6 @@ def _clean_body(text):
         lines.append(line)
     while lines and not lines[-1]:
         lines.pop()
-    # הגבלה ל-35 שורות תוכן
     out, count = [], 0
     for line in lines:
         if line:
@@ -74,7 +76,6 @@ class _BadRequest(Exception):
     pass
 
 
-# סדר עדיפות: המודל המועדף + גיבויים
 FALLBACK_MODELS = [
     "gemini-3.8-flash",
     "gemini-3.6-flash",
@@ -125,7 +126,7 @@ def _generate(base):
     """מנסה את המודל המועדף; אם אינו קיים או עמוס, עובר למודל הבא."""
     global _use_thinking
     models = [m for m in [config.GEMINI_MODEL] + FALLBACK_MODELS if m not in _dead_models]
-    models = list(dict.fromkeys(models))  # בלי כפילויות, שומר סדר
+    models = list(dict.fromkeys(models))
     busy = []
     for model in models:
         cfgs = (_FULL_CFG, _BASE_CFG) if _use_thinking else (_BASE_CFG,)
@@ -142,7 +143,7 @@ def _generate(base):
                 break
             except _BadRequest as exc:
                 if cfg is _FULL_CFG:
-                    continue  # ננסה בלי הגדרות החשיבה
+                    continue
                 raise RuntimeError(f"Gemini דחה את הבקשה: {exc}") from exc
             if cfg is _BASE_CFG:
                 _use_thinking = False
@@ -162,11 +163,11 @@ def current_model():
 
 
 def edit(article):
-    """מחזיר dict: relevant, emoji, headline, body (טקסט נקי, לא HTML)."""
+    """מחזיר dict: relevant, emoji, headline, body."""
     prompt = (
         f"מקור: {article.source}\n"
         f"כותרת: {article.title}\n"
-        f"תקציר: {article.summary[:1500] or '(אין תקציר)'}"
+        f"תקציר: {article.summary[:1800] or '(אין תקציר)'}"
     )
     base = {
         "systemInstruction": {"parts": [{"text": SYSTEM}]},
@@ -183,14 +184,19 @@ def edit(article):
     headline = URL_RE.sub("", str(res.get("headline", ""))).replace("*", "").strip()
     body = _clean_body(str(res.get("body", "")))
     relevant = bool(res.get("relevant")) and bool(headline) and bool(body)
-    return {"relevant": relevant, "emoji": (res.get("emoji") or "🔥").strip()[:4], "headline": headline, "body": body}
+    return {
+        "relevant": relevant,
+        "emoji": (res.get("emoji") or "🔥").strip()[:4],
+        "headline": headline,
+        "body": body,
+    }
 
 
-RLM = "\u200f"  # סימן כיוון ימין-לשמאל: מונע מקטעים עם אנגלית להיצמד שמאלה
+RLM = "\u200f"  # סימן כיוון ימין-לשמאל
 
 
 def build_draft(article, edited):
-    """עיצוב ההודעה (HTML של טלגרם): כותרת מודגשת, גוף, קרדיט קטן."""
+    """עיצוב ההודעה (HTML של טלגרם)."""
     esc = lambda t: html.escape(t, quote=False)
     title = f"{RLM}{edited['emoji']} <b>{esc(edited['headline'])}</b>"
     credit = f"{RLM}📡 <i>{esc(config.CREDIT)}</i>"
@@ -202,4 +208,10 @@ def build_draft(article, edited):
     body = "\n".join((RLM + ln) if ln else ln for ln in body.split("\n"))
 
     text = f"{title}\n\n{body}\n\n{credit}"
-    return {"text": text, "short": title, "image": article.image, "video": article.video, "url": article.link}
+    return {
+        "text": text,
+        "short": title,
+        "image": article.image,
+        "video": article.video,
+        "url": article.link,
+    }
