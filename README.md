@@ -55,7 +55,7 @@
 | `GEMINI_API_KEY` | מפתח מ-Google AI Studio | ✅ |
 | `APPROVAL_MODE` | `false` (או `true`) | |
 | `ADMIN_CHAT_ID` | המספר שלך | רק אם APPROVAL_MODE=true |
-| `GEMINI_MODEL` | `gemini-2.0-flash` | |
+| `GEMINI_MODEL` | `gemini-3.8-flash` | |
 | `INTERVAL_SECONDS` | `120` | |
 | `MAX_ARTICLE_AGE_HOURS` | `3` | |
 
@@ -63,7 +63,7 @@
 
 ב-Logs אמורה להופיע השורה:
 ```
-News IL starting | model=gemini-2.0-flash | ...
+News IL starting | model=gemini-3.8-flash | ...
 ```
 
 ---

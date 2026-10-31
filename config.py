@@ -22,7 +22,7 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID", "").strip()
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "").strip()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash").strip()
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
 
 APPROVAL_MODE = _bool("APPROVAL_MODE", False)
 INTERVAL_SECONDS = max(30, _int("INTERVAL_SECONDS", 120))

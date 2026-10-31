@@ -52,10 +52,15 @@ class Telegram:
 
     # ---------- שליחה ----------
     def send_message(self, chat_id, text, markup=None):
-        return self.call(
-            "sendMessage", chat_id=chat_id, text=text, parse_mode="HTML",
-            disable_web_page_preview=True, reply_markup=markup,
-        )
+        params = {
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": True,
+        }
+        if markup is not None:
+            params["reply_markup"] = markup
+        return self.call("sendMessage", **params)
 
     def _send_media(self, chat_id, kind, url, caption, markup):
         method, field = ("sendVideo", "video") if kind == "video" else ("sendPhoto", "photo")
